@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package go.micro.srv.sms;
+
+service Send {
+	rpc Code(CodeRequest) returns (CodeResponse) {}
+	rpc Validate(ValidateRequest) returns (ValidateResponse) {}
+}
+
+message CodeRequest {
+	string mobile = 1;
+	string code = 2;
+}
+
+message CodeResponse {
+	bool success = 1;
+}
+
+message ValidateRequest {
+	string mobile = 1;
+	string code = 2;
+}
+
+message ValidateResponse {
+	bool success = 1;
+}

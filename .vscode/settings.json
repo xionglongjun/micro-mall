@@ -1,0 +1,22 @@
+{
+  "rest-client.environmentVariables": {
+    "$shared": {
+      "version": "v1",
+      "prodToken": "foo",
+      "nonProdToken": "bar"
+    },
+    "local": {
+      "version": "v1",
+      "host": "127.0.0.1:8080",
+      "dummyhost": "local",
+      "token": "{{$shared nonProdToken}}",
+      "secretKey": "devSecret"
+    },
+    "production": {
+      "host": "api.apiopen.top",
+      "dummyhost": "dummy.restapiexample.com",
+      "token": "{{$shared prodToken}}",
+      "secretKey": "prodSecret"
+    }
+  }
+}

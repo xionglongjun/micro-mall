@@ -1,0 +1,19 @@
+@hostname = 127.0.0.1
+@port = 8080
+@host = {{hostname}}:{{port}}
+@contentType = application/json
+
+@mod = user
+
+@baseUrl = http://{{host}}/user
+
+### 用户登录
+@path = /auth 
+POST {{baseUrl}}{{path}} HTTP/1.1
+content-type: {{contentType}}
+
+{
+    # "mobile": "18584565115",
+    "name": "jayden",
+    "password": "123456"
+}

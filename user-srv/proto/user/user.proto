@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package go.micro.srv.user;
+
+service User {
+	rpc Create(CreateRequest) returns (CreateResponse) {}
+	rpc Edit(EditRequest) returns (EditResponse) {}
+}
+
+message CreateRequest {
+	string name = 1;
+	string password = 2;
+	string mobile = 3;
+	string email = 4;
+}
+
+message CreateResponse {
+	int64 id = 1;
+	CreateRequest CreateRequest = 2;
+}
+
+message EditRequest {
+	int64 id = 1;
+	CreateRequest CreateRequest = 2;
+}
+
+message EditResponse {
+	int64 id = 1;
+	CreateRequest CreateRequest = 2;
+}
