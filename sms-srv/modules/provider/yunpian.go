@@ -10,6 +10,15 @@ import (
 type YunPian struct {
 	Name   string
 	APIKey string
+	Debug  bool
+}
+
+// String ...
+func (m *YunPian) String() string {
+	if m.Name == "" {
+		m.Name = "yunpian"
+	}
+	return m.Name
 }
 
 // Send ...
@@ -22,7 +31,11 @@ func (m *YunPian) Send(mobile, content string) (string, error) {
 	)
 	smsInfo.Mobile = mobile
 	smsInfo.Text = content
-	result, err = api.SmsSend(smsInfo)
+	if !m.Debug {
+		result, err = api.SmsSend(smsInfo)
+	} else {
+		result.Sid = 0
+	}
 	if err != nil {
 		return "", err
 	}

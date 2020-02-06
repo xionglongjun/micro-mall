@@ -1,9 +1,10 @@
 package repository
 
 import (
-	"fmt"
 	"sms-srv/enums"
 	"sms-srv/models"
+
+	send "sms-srv/proto/send"
 
 	"github.com/jinzhu/gorm"
 )
@@ -36,17 +37,14 @@ func (r *TemplateRepo) Create(templateModel *models.Template) error {
 }
 
 // GetCodeTemplateFirst ...
-func (r *TemplateRepo) GetCodeTemplateFirst(provider string, bizType models.TempBizType) (*models.Template, error) {
+func (r *TemplateRepo) GetCodeTemplateFirst(provider string, bizType uint) (*models.Template, error) {
 	var (
 		templateModel models.Template
+		err           error
 	)
-
-	templateModel.Mode = models.Verification
-	templateModel.Enabled = enums.Yes
 	templateModel.Provider = provider
-	templateModel.BizType = bizType
-	fmt.Println(enums.Yes)
-	if err := r.Where(templateModel).First(&templateModel).Error; err != nil {
+	r.DB = r.Scopes(models.Scope("enabled", uint(enums.Yes)), models.Scope("mode", uint(send.Mode_Code)), models.Scope("biz_type", bizType))
+	if err = r.Where(&templateModel).First(&templateModel).Error; err != nil {
 		return nil, err
 	}
 	return &templateModel, nil

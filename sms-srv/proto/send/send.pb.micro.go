@@ -6,6 +6,7 @@ package go_micro_srv_sms
 import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	_ "github.com/golang/protobuf/ptypes/timestamp"
 	math "math"
 )
 
@@ -34,6 +35,7 @@ var _ server.Option
 // Client API for Send service
 
 type SendService interface {
+	BizType(ctx context.Context, in *Request, opts ...client.CallOption) (*BizTypeResponse, error)
 	Code(ctx context.Context, in *CodeRequest, opts ...client.CallOption) (*CodeResponse, error)
 	Validate(ctx context.Context, in *ValidateRequest, opts ...client.CallOption) (*ValidateResponse, error)
 }
@@ -54,6 +56,16 @@ func NewSendService(name string, c client.Client) SendService {
 		c:    c,
 		name: name,
 	}
+}
+
+func (c *sendService) BizType(ctx context.Context, in *Request, opts ...client.CallOption) (*BizTypeResponse, error) {
+	req := c.c.NewRequest(c.name, "Send.BizType", in)
+	out := new(BizTypeResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *sendService) Code(ctx context.Context, in *CodeRequest, opts ...client.CallOption) (*CodeResponse, error) {
@@ -79,12 +91,14 @@ func (c *sendService) Validate(ctx context.Context, in *ValidateRequest, opts ..
 // Server API for Send service
 
 type SendHandler interface {
+	BizType(context.Context, *Request, *BizTypeResponse) error
 	Code(context.Context, *CodeRequest, *CodeResponse) error
 	Validate(context.Context, *ValidateRequest, *ValidateResponse) error
 }
 
 func RegisterSendHandler(s server.Server, hdlr SendHandler, opts ...server.HandlerOption) error {
 	type send interface {
+		BizType(ctx context.Context, in *Request, out *BizTypeResponse) error
 		Code(ctx context.Context, in *CodeRequest, out *CodeResponse) error
 		Validate(ctx context.Context, in *ValidateRequest, out *ValidateResponse) error
 	}
@@ -97,6 +111,10 @@ func RegisterSendHandler(s server.Server, hdlr SendHandler, opts ...server.Handl
 
 type sendHandler struct {
 	SendHandler
+}
+
+func (h *sendHandler) BizType(ctx context.Context, in *Request, out *BizTypeResponse) error {
+	return h.SendHandler.BizType(ctx, in, out)
 }
 
 func (h *sendHandler) Code(ctx context.Context, in *CodeRequest, out *CodeResponse) error {

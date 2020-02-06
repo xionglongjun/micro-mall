@@ -1,7 +1,7 @@
 package enums
 
 // Enabled ...
-type Enabled uint
+type Enabled int32
 
 const (
 	// No ...
@@ -21,25 +21,25 @@ func (e Enabled) String() string {
 	return str
 }
 
-// Status 状态
-type Status int
+// State 状态
+type State int32
 
 const (
-	// Failed 失败
-	Failed Status = iota
-	// Success 失败
-	Success
+	// Close 关
+	Close State = iota
+	// Open 开
+	Open
 	// Await 等待
 	Await
 )
 
-func (s Status) String() string {
+func (s State) String() string {
 	switch s {
-	case Success:
-		return "Success"
+	case Open:
+		return "open"
 	case Await:
 		return "Await"
 	default:
-		return "Failed"
+		return "close"
 	}
 }

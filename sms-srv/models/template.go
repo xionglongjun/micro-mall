@@ -1,7 +1,6 @@
 package models
 
 import (
-	"sms-srv/enums"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -10,37 +9,44 @@ import (
 // Template ...
 type Template struct {
 	gorm.Model
-	Mode      TempMode      `gorm:"type:tinyint(1);default:0;not null"`
-	Provider  string        `gorm:"type:varchar(100);not null"`
-	Sign      string        `gorm:"type:varchar(100);not null"`
-	Content   string        `gorm:"type:text;not null"`
-	BizType   TempBizType   `gorm:"type:tinyint(1);default:0;index;not null"`
-	ExpiresAt time.Time     `gorm:"type:datetime"`
-	Enabled   enums.Enabled `gorm:"type:tinyint(1);default:1;index;not null"`
+	Mode      uint      `gorm:"type:tinyint(1);default:0;not null"`
+	Provider  string    `gorm:"type:varchar(100);not null"`
+	Sign      string    `gorm:"type:varchar(100);not null"`
+	Content   string    `gorm:"type:text;not null"`
+	BizType   uint      `gorm:"type:tinyint(1);default:0;index;not null"`
+	ExpiresAt time.Time `gorm:"type:datetime"`
+	Enabled   uint      `gorm:"type:tinyint(1);default:1;index;not null"`
+}
+
+// ScopeMode scopes
+func (t *Template) ScopeMode(mode TempMode) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("mode = ?", uint(mode))
+	}
 }
 
 // TempBizType ...
-type TempBizType uint
+type TempBizType int
 
 const (
-	// Login ...
-	Login TempBizType = iota
-	// Register ...
-	Register
-	// EditPassword ...
-	EditPassword
-	// ResetPassword ...
-	ResetPassword
+	// TempLogin ...
+	TempLogin TempBizType = iota
+	// TempRegister ...
+	TempRegister
+	// TempEditPassword ...
+	TempEditPassword
+	// TempResetPassword ...
+	TempResetPassword
 )
 
 func (e TempBizType) String() string {
 	str := ""
 	switch e {
-	case Register:
+	case TempRegister:
 		str = "register"
-	case EditPassword:
+	case TempEditPassword:
 		str = "editPassword"
-	case ResetPassword:
+	case TempResetPassword:
 		str = "resetPassword"
 	default:
 		str = "login"
@@ -49,19 +55,19 @@ func (e TempBizType) String() string {
 }
 
 // TempMode ...
-type TempMode uint
+type TempMode int
 
 const (
-	// Verification ...
-	Verification TempMode = iota
-	// Notice ...
-	Notice
+	// TempVerification ...
+	TempVerification TempMode = iota
+	// TempNotice ...
+	TempNotice
 )
 
 func (e TempMode) String() string {
 	str := ""
 	switch e {
-	case Notice:
+	case TempNotice:
 		str = "notice"
 	default:
 		str = "verification"

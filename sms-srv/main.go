@@ -34,7 +34,7 @@ func main() {
 	// 数据迁移
 	db.Begin().AutoMigrate(&models.Send{}, &models.Code{}, &models.Template{})
 	// APIkey yunpian sms apikey
-	APIKey := "123456"
+	APIKey := "7aa71cd46746dfec1c69a3c62f443722"
 
 	// New Service
 	service := micro.NewService(
@@ -47,10 +47,10 @@ func main() {
 
 	// Register Handler
 	send.RegisterSendHandler(service.Server(), &handler.Send{
-		Repo:     &repository.SendRepo{DB: db},
-		CodeRepo: &repository.CodeRepo{DB: db},
+		Repo: &repository.SendRepo{DB: db},
 		SmsProvider: &provider.YunPian{
 			APIKey: APIKey,
+			Debug:  true,
 		},
 	})
 

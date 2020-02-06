@@ -16,15 +16,15 @@ func (repo *SendRepo) Create(sendModel *models.Send) error {
 	tx := repo.Begin()
 
 	defer func() {
-    if r := recover(); r != nil {
-      tx.Rollback()
-    }
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
 	}()
 
 	if err := tx.Error; err != nil {
-    return err
+		return err
 	}
-	
+
 	if err := tx.Create(&sendModel).Error; err != nil {
 		tx.Rollback()
 		return err

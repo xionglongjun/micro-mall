@@ -15,13 +15,13 @@ type Driver interface {
 
 // Mysql ...
 type Mysql struct {
-	Host string
-	User string
+	Host     string
+	User     string
 	Password string
-	Name string
-	Charset string
-	Prefix string
-	Debug bool
+	Name     string
+	Charset  string
+	Prefix   string
+	Debug    bool
 }
 
 // Connection ...
@@ -33,7 +33,7 @@ func (m *Mysql) Connection() (*gorm.DB, error) {
 	if m.Host == "" {
 		m.Host = "localhost:3306"
 	}
-	
+
 	if m.Name == "" {
 		m.Name = "root"
 	}
@@ -44,14 +44,13 @@ func (m *Mysql) Connection() (*gorm.DB, error) {
 
 	db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&parseTime=True&loc=Local", m.User, m.Password, m.Host, m.Name, m.Charset))
 
-
 	if err != nil {
 		log.Fatalf("models.Connection err: %v", err)
 		return nil, err
 	}
 
-	gorm.DefaultTableNameHandler = func (db *gorm.DB, defaultTableName string) string  {
-		return m.Prefix + defaultTableName;
+	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		return m.Prefix + defaultTableName
 	}
 
 	db.SingularTable(true)
@@ -61,4 +60,22 @@ func (m *Mysql) Connection() (*gorm.DB, error) {
 	db.LogMode(m.Debug)
 	db.Set("gorm:table_options", "ENGINE=InnoDB")
 	return db, err
+}
+
+// Scope scopes
+func Scope(key string, mode interface{}) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where(key+" = ?", mode)
+	}
+}
+
+// ModelEnabled scopes
+func ModelEnabled(ok bool) func(db *gorm.DB) *gorm.DB {
+	var enabled uint
+	if ok {
+		enabled = 1
+	}
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("enabled = ?", enabled)
+	}
 }
