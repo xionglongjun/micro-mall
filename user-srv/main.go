@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"user-srv/client"
 	"user-srv/handler"
 	"user-srv/models"
 	"user-srv/repository"
@@ -59,7 +60,9 @@ func main() {
 	)
 
 	// Initialise service
-	service.Init()
+	service.Init(
+		micro.WrapHandler(client.SmsWrapper(service)),
+	)
 
 	// Register Handler
 	auth.RegisterAuthHandler(service.Server(), &handler.Auth{Repo: &repository.AuthRepo{DB: db}, Jwt: jwt})

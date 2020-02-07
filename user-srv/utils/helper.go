@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"regexp"
 	"strings"
 	"time"
 
@@ -32,4 +33,10 @@ func GenValidateCode(width int) string {
 		fmt.Fprintf(&sb, "%d", numeric[rand.Intn(r)])
 	}
 	return sb.String()
+}
+
+// ValidateMobile ...
+func ValidateMobile(mobile string) bool {
+	ok, _ := regexp.MatchString(`^(1[1-9]\d{9})$`, mobile)
+	return ok
 }

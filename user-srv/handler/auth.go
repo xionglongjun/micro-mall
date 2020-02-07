@@ -2,10 +2,13 @@ package handler
 
 import (
 	"context"
+	"user-srv/client"
 	"user-srv/models"
 	auth "user-srv/proto/auth"
 	"user-srv/repository"
 	"user-srv/utils"
+
+	send "github.com/xionglongjun/micro-mall/sms-srv/proto/send"
 
 	"github.com/micro/go-micro/errors"
 )
@@ -64,17 +67,28 @@ func (h *Auth) Mobile(ctx context.Context, req *auth.MobileRequest, rsp *auth.Au
 		err       error
 		userModel *models.User
 	)
-	if req.Mobile == "" {
-		return errors.BadRequest("go.micro.srv.user Name", "mobile not null")
+	smsClient, ok := client.SmsContext(ctx)
+	if !ok {
+		return errors.InternalServerError("io.github.entere.api.user.info", "user client not found")
+	}
+	if !utils.ValidateMobile(req.Mobile) {
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile not null")
 	}
 
 	if req.Code == "" {
-		return errors.BadRequest("go.micro.srv.user Name", "code not null")
+		return errors.BadRequest("go.micro.srv.user Mobile", "code not null")
 	}
 
+	_, err = smsClient.Validate(ctx, &send.ValidateRequest{
+		Mobile: req.Mobile,
+		Code:   req.Code,
+	})
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Mobile", "sms validate: %s", errors.Parse(err.Error()).Detail)
+	}
 	userModel, err = h.Repo.Mobile(req.Mobile)
 	if err != nil {
-		return errors.BadRequest("go.micro.srv.user Name", "mobile find null")
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile find null")
 	}
 
 	claims := utils.MyClaims{

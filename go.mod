@@ -8,3 +8,5 @@ require (
 	github.com/micro/go-plugins v1.5.1
 	github.com/micro/micro v1.18.0
 )
+
+replace github.com/xionglongjun/micro-mall => /Users/jayden/Development/Code/Golang/micro-mall
