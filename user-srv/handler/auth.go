@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"user-srv/client"
 	"user-srv/models"
 	auth "user-srv/proto/auth"
 	"user-srv/repository"
@@ -10,6 +9,7 @@ import (
 
 	send "github.com/xionglongjun/micro-mall/sms-srv/proto/send"
 
+	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/errors"
 )
 
@@ -38,7 +38,7 @@ func (h *Auth) Name(ctx context.Context, req *auth.NameRequest, rsp *auth.AuthRe
 		return errors.BadRequest("go.micro.srv.user Name", "name find null")
 	}
 
-	pass, err := utils.EncodeSalt("123456", userModel.Salt)
+	pass, err := utils.EncodeSalt(req.Password, userModel.Salt)
 	if err != nil {
 		return errors.BadRequest("go.micro.srv.user Name", "Password encode validate fail")
 	}
@@ -67,10 +67,7 @@ func (h *Auth) Mobile(ctx context.Context, req *auth.MobileRequest, rsp *auth.Au
 		err       error
 		userModel *models.User
 	)
-	smsClient, ok := client.SmsContext(ctx)
-	if !ok {
-		return errors.InternalServerError("io.github.entere.api.user.info", "user client not found")
-	}
+
 	if !utils.ValidateMobile(req.Mobile) {
 		return errors.BadRequest("go.micro.srv.user Mobile", "mobile not null")
 	}
@@ -78,17 +75,20 @@ func (h *Auth) Mobile(ctx context.Context, req *auth.MobileRequest, rsp *auth.Au
 	if req.Code == "" {
 		return errors.BadRequest("go.micro.srv.user Mobile", "code not null")
 	}
+	
+	userModel, err = h.Repo.Mobile(req.Mobile)
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile find null")
+	}
 
+	smsClient := send.NewSendService("go.micro.srv.sms", client.DefaultClient)
 	_, err = smsClient.Validate(ctx, &send.ValidateRequest{
 		Mobile: req.Mobile,
 		Code:   req.Code,
 	})
+
 	if err != nil {
 		return errors.BadRequest("go.micro.srv.user Mobile", "sms validate: %s", errors.Parse(err.Error()).Detail)
-	}
-	userModel, err = h.Repo.Mobile(req.Mobile)
-	if err != nil {
-		return errors.BadRequest("go.micro.srv.user Mobile", "mobile find null")
 	}
 
 	claims := utils.MyClaims{
@@ -102,5 +102,65 @@ func (h *Auth) Mobile(ctx context.Context, req *auth.MobileRequest, rsp *auth.Au
 	}
 	rsp.Token = jwtToken.Token
 	rsp.ExpiresAt = jwtToken.ExpiresAt.Format("2006-01-02 15:04:05")
+	return nil
+}
+
+// Register ...
+func (h *Auth) Register(ctx context.Context, req *auth.RegisterRequest, rsp *auth.RegisterResponse) error {
+	var (
+		err       error
+		userRepo = repository.UserRepo{DB: h.Repo.DB}
+	)
+	salt := utils.EncodeMD5(utils.GenValidateCode(10))
+	pass, err := utils.EncodeSalt(req.Password, salt)
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Name", "Password encode validate fail")
+	}
+
+	if !utils.ValidateMobile(req.Mobile) {
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile not null")
+	}
+
+	if req.Code == "" {
+		return errors.BadRequest("go.micro.srv.user Mobile", "code not null")
+	}
+	
+	_, err = h.Repo.Mobile(req.Mobile)
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile find null")
+	}
+	
+	smsClient := send.NewSendService("go.micro.srv.sms", client.DefaultClient)
+	_, err = smsClient.Validate(ctx, &send.ValidateRequest{
+		Mobile: req.Mobile,
+		Code:   req.Code,
+		BizType: send.BizType_register,
+	})
+	userModel := models.User{
+		Mobile: req.Mobile,
+		Name: req.Name,
+		Password: pass,
+		Salt: salt,
+	}
+	if err = userRepo.Create(&userModel); err != nil {
+		return errors.BadRequest("go.micro.srv.user Mobile", "register fail")
+	}
+	rsp.Success = true
+	return nil
+}
+
+// ValidateToken ...
+func (h *Auth) ValidateToken(ctx context.Context, req *auth.Token, rsp *auth.Token) error {
+	if req.Token == "" {
+		return errors.BadRequest("go.micro.srv.user ValidateToken", "token not null")
+	}
+	myClaims, err := h.Jwt.ParseToken(req.Token)
+	if err != nil {
+		return errors.Unauthorized("go.micro.srv.user ValidateToken", err.Error())
+	}
+	if myClaims.ID == 0 {
+		return errors.Unauthorized("go.micro.srv.user ValidateToken", "invalid user")
+	}
+	rsp.Valid = true
 	return nil
 }

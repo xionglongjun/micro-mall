@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"math/rand"
@@ -39,4 +41,12 @@ func GenValidateCode(width int) string {
 func ValidateMobile(mobile string) bool {
 	ok, _ := regexp.MatchString(`^(1[1-9]\d{9})$`, mobile)
 	return ok
+}
+
+// EncodeMD5 md5 encryption
+func EncodeMD5(value string) string {
+	m := md5.New()
+	m.Write([]byte(value))
+
+	return hex.EncodeToString(m.Sum(nil))
 }

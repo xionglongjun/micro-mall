@@ -1,48 +1,102 @@
 package handler
 
 import (
-	"context"
-
-	"github.com/micro/go-micro/util/log"
-
 	auth "auth-srv/proto/auth"
+	"auth-srv/repository"
+	"auth-srv/utils"
+	"context"
+	"user-srv/models"
+
+	send "github.com/xionglongjun/micro-mall/sms-srv/proto/send"
+
+	"github.com/micro/go-micro/client"
+	"github.com/micro/go-micro/errors"
 )
 
-type Auth struct{}
+// Auth ...
+type Auth struct {
+	Repo *repository.AuthRepo
+	Jwt  utils.Jwt
+}
 
-// Call is a single request handler called via client.Call or the generated client code
-func (e *Auth) Call(ctx context.Context, req *auth.Request, rsp *auth.Response) error {
-	log.Log("Received Auth.Call request")
-	rsp.Msg = "Hello " + req.Name
+// Name ...
+func (h *Auth) Name(ctx context.Context, req *auth.NameRequest, rsp *auth.AuthResponse) error {
+	var (
+		err       error
+		userModel *models.User
+	)
+	if req.Name == "" {
+		return errors.BadRequest("go.micro.srv.user Name", "name not null")
+	}
+
+	if req.Password == "" {
+		return errors.BadRequest("go.micro.srv.user Name", "Password not null")
+	}
+
+	userModel, err = h.Repo.Name(req.Name)
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Name", "name find null")
+	}
+
+	pass, err := utils.EncodeSalt("123456", userModel.Salt)
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Name", "Password encode validate fail")
+	}
+
+	if pass != userModel.Password {
+		return errors.BadRequest("go.micro.srv.user Name", "Password fail")
+	}
+	claims := utils.MyClaims{
+		ID:     userModel.ID,
+		Name:   userModel.Name,
+		Mobile: userModel.Mobile,
+	}
+	jwtToken, err := h.Jwt.NewToken(claims)
+	if err != nil {
+		return errors.Unauthorized("go.micro.srv.user Name", "token generate fail")
+	}
+
+	rsp.Token = jwtToken.Token
+	rsp.ExpiresAt = jwtToken.ExpiresAt.Format("2006-01-02 15:04:05")
 	return nil
 }
 
-// Stream is a server side stream handler called via client.Stream or the generated client code
-func (e *Auth) Stream(ctx context.Context, req *auth.StreamingRequest, stream auth.Auth_StreamStream) error {
-	log.Logf("Received Auth.Stream request with count: %d", req.Count)
-
-	for i := 0; i < int(req.Count); i++ {
-		log.Logf("Responding: %d", i)
-		if err := stream.Send(&auth.StreamingResponse{
-			Count: int64(i),
-		}); err != nil {
-			return err
-		}
+// Mobile ...
+func (h *Auth) Mobile(ctx context.Context, req *auth.MobileRequest, rsp *auth.AuthResponse) error {
+	var (
+		err       error
+		userModel *models.User
+	)
+	smsClient := send.NewSendService("go.micro.srv.sms", client.DefaultClient)
+	if !utils.ValidateMobile(req.Mobile) {
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile not null")
 	}
 
+	if req.Code == "" {
+		return errors.BadRequest("go.micro.srv.user Mobile", "code not null")
+	}
+	_, err = smsClient.Validate(ctx, &send.ValidateRequest{
+		Mobile: req.Mobile,
+		Code:   req.Code,
+	})
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Mobile", "sms validate: %s", errors.Parse(err.Error()).Detail)
+	}
+	userModel, err = h.Repo.Mobile(req.Mobile)
+	if err != nil {
+		return errors.BadRequest("go.micro.srv.user Mobile", "mobile find null")
+	}
+
+	claims := utils.MyClaims{
+		ID:     userModel.ID,
+		Name:   userModel.Name,
+		Mobile: userModel.Mobile,
+	}
+	jwtToken, err := h.Jwt.NewToken(claims)
+	if err != nil {
+		return errors.Unauthorized("go.micro.srv.user Name", "token generate fail")
+	}
+	rsp.Token = jwtToken.Token
+	rsp.ExpiresAt = jwtToken.ExpiresAt.Format("2006-01-02 15:04:05")
 	return nil
-}
-
-// PingPong is a bidirectional stream handler called via client.Stream or the generated client code
-func (e *Auth) PingPong(ctx context.Context, stream auth.Auth_PingPongStream) error {
-	for {
-		req, err := stream.Recv()
-		if err != nil {
-			return err
-		}
-		log.Logf("Got ping %v", req.Stroke)
-		if err := stream.Send(&auth.Pong{Stroke: req.Stroke}); err != nil {
-			return err
-		}
-	}
 }

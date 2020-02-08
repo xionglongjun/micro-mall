@@ -2,10 +2,14 @@
 GOPATH:=$(shell go env GOPATH)
 
 
-.PHONY: proto
-proto:
-	protoc --proto_path=${GOPATH}/src:. --micro_out=. --go_out=. proto/auth/auth.proto
 
+.PHONY: proto
+mod = auth
+name = auth
+proto:
+	@echo execute $(mod) proto file generate
+	protoc --proto_path=. --micro_out=. --go_out=. proto/$(mod)/${name}.proto
+	
 .PHONY: build
 build: proto
 

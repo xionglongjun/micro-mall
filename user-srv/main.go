@@ -3,19 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
-	"user-srv/client"
 	"user-srv/handler"
 	"user-srv/models"
+	auth "user-srv/proto/auth"
+	user "user-srv/proto/user"
 	"user-srv/repository"
 	"user-srv/utils"
 
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/server"
-	"github.com/micro/go-micro/util/log"
-
-	auth "user-srv/proto/auth"
-	user "user-srv/proto/user"
 )
 
 // logWrapper is a handler wrapper
@@ -28,24 +26,22 @@ func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 }
 
 func main() {
-	var (
-		driver models.Driver
-		jwt    utils.Jwt
-	)
-	driver = &models.Mysql{
+	mysql := &models.Mysql{
 		User:     "root",
 		Password: "123456",
 		Name:     "mall_user",
 		Host:     "127.0.0.1:3306",
 		Debug:    true,
 	}
+	jwt := utils.Jwt{
+		Secret:  "ldjkvndmdhworywwnxksdhsdksdf",
+		Issuer:  "user",
+		Expires: 24 * time.Hour,
+	}
 
-	jwt.Secret = "ldjkvndmdhworywwnxksdhsdksdf"
-	jwt.Issuer = "user"
-	jwt.Expires = 24 * time.Hour
-
-	db, err := driver.Connection()
+	db, err := mysql.Connection()
 	defer db.Close()
+
 	if err != nil {
 		panic(err.Error())
 	}
@@ -56,13 +52,12 @@ func main() {
 	service := micro.NewService(
 		micro.Name("go.micro.srv.user"),
 		micro.Version("latest"),
+		// 日志包装器
 		micro.WrapHandler(logWrapper),
 	)
 
 	// Initialise service
-	service.Init(
-		micro.WrapHandler(client.SmsWrapper(service)),
-	)
+	service.Init()
 
 	// Register Handler
 	auth.RegisterAuthHandler(service.Server(), &handler.Auth{Repo: &repository.AuthRepo{DB: db}, Jwt: jwt})

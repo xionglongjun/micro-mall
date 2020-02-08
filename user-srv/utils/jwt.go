@@ -1,21 +1,9 @@
 package utils
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-)
-
-// BizType ...
-type BizType int
-
-const (
-	// BizStruct ...
-	BizStruct BizType = iota
-	// BizMap ...
-	BizMap
 )
 
 // Jwt ...
@@ -34,54 +22,6 @@ type JwtToken struct {
 // ByteSecret ...
 func (j *Jwt) ByteSecret() []byte {
 	return []byte(j.Secret)
-}
-
-// NewMapToken generate tokens used for auth
-func (j *Jwt) NewMapToken(params map[string]interface{}, expire time.Time) (string, error) {
-	var (
-		claims    jwt.Claims
-		jwtSecret = j.ByteSecret()
-	)
-	nowTime := time.Now()
-	if expire.Before(nowTime) {
-		expire = nowTime.Add(3 * time.Hour)
-	}
-
-	mapClaims := make(jwt.MapClaims)
-	for k, v := range params {
-		mapClaims[k] = v
-	}
-	mapClaims["exp"] = expire.Unix()
-	mapClaims["iss"] = j.Issuer
-	claims = mapClaims
-
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := tokenClaims.SignedString(jwtSecret)
-
-	return token, err
-}
-
-// ParseTokenMap parsing token
-func (j *Jwt) ParseTokenMap(token string) (claims jwt.Claims, err error) {
-	var (
-		tokenClaims *jwt.Token
-		jwtSecret   = j.ByteSecret()
-	)
-	claims = make(jwt.MapClaims)
-
-	tokenClaims, err = jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(jwt.MapClaims); ok && tokenClaims.Valid {
-			return claims, nil
-		}
-	}
-
-	return nil, err
 }
 
 // MyClaims ...
@@ -126,47 +66,14 @@ func (j *Jwt) ParseToken(token string) (*MyClaims, error) {
 	var (
 		jwtSecret = j.ByteSecret()
 	)
-	tokenClaims, err := jwt.ParseWithClaims(token, &MyClaims{}, func(token *jwt.Token) (interface{}, error) {
+	
+	// Parse the token
+	tokenType, err := jwt.ParseWithClaims(token, &MyClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
-
-	if tokenClaims != nil {
-		if claims, ok := tokenClaims.Claims.(*MyClaims); ok && tokenClaims.Valid {
-			return claims, nil
-		}
+	// Validate the token and return the custom claims
+	if claims, ok := tokenType.Claims.(*MyClaims); ok && tokenType.Valid {
+		return claims, nil
 	}
-
 	return nil, err
-}
-
-// Parse parsing token
-func (j *Jwt) Parse(tokenString string) (claims jwt.Claims, err error) {
-	var (
-		token     *jwt.Token
-		jwtSecret = j.ByteSecret()
-	)
-
-	token, err = jwt.Parse(tokenString, func(*jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if mapClaims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		claims = mapClaims
-	} else if myClaims, ok := token.Claims.(MyClaims); ok && token.Valid {
-		claims = myClaims
-	}
-
-	return claims, nil
-}
-
-// EncodeMD5 md5 encryption
-func EncodeMD5(value string) string {
-	m := md5.New()
-	m.Write([]byte(value))
-
-	return hex.EncodeToString(m.Sum(nil))
 }

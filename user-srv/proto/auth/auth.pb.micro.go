@@ -36,6 +36,8 @@ var _ server.Option
 type AuthService interface {
 	Name(ctx context.Context, in *NameRequest, opts ...client.CallOption) (*AuthResponse, error)
 	Mobile(ctx context.Context, in *MobileRequest, opts ...client.CallOption) (*AuthResponse, error)
+	Register(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error)
+	ValidateToken(ctx context.Context, in *Token, opts ...client.CallOption) (*Token, error)
 }
 
 type authService struct {
@@ -76,17 +78,41 @@ func (c *authService) Mobile(ctx context.Context, in *MobileRequest, opts ...cli
 	return out, nil
 }
 
+func (c *authService) Register(ctx context.Context, in *RegisterRequest, opts ...client.CallOption) (*RegisterResponse, error) {
+	req := c.c.NewRequest(c.name, "Auth.Register", in)
+	out := new(RegisterResponse)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authService) ValidateToken(ctx context.Context, in *Token, opts ...client.CallOption) (*Token, error) {
+	req := c.c.NewRequest(c.name, "Auth.ValidateToken", in)
+	out := new(Token)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Auth service
 
 type AuthHandler interface {
 	Name(context.Context, *NameRequest, *AuthResponse) error
 	Mobile(context.Context, *MobileRequest, *AuthResponse) error
+	Register(context.Context, *RegisterRequest, *RegisterResponse) error
+	ValidateToken(context.Context, *Token, *Token) error
 }
 
 func RegisterAuthHandler(s server.Server, hdlr AuthHandler, opts ...server.HandlerOption) error {
 	type auth interface {
 		Name(ctx context.Context, in *NameRequest, out *AuthResponse) error
 		Mobile(ctx context.Context, in *MobileRequest, out *AuthResponse) error
+		Register(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error
+		ValidateToken(ctx context.Context, in *Token, out *Token) error
 	}
 	type Auth struct {
 		auth
@@ -105,4 +131,12 @@ func (h *authHandler) Name(ctx context.Context, in *NameRequest, out *AuthRespon
 
 func (h *authHandler) Mobile(ctx context.Context, in *MobileRequest, out *AuthResponse) error {
 	return h.AuthHandler.Mobile(ctx, in, out)
+}
+
+func (h *authHandler) Register(ctx context.Context, in *RegisterRequest, out *RegisterResponse) error {
+	return h.AuthHandler.Register(ctx, in, out)
+}
+
+func (h *authHandler) ValidateToken(ctx context.Context, in *Token, out *Token) error {
+	return h.AuthHandler.ValidateToken(ctx, in, out)
 }
