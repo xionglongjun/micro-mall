@@ -12,3 +12,5 @@
 *.out
 
 .idea/
+sms-srv/sms-srv
+user-srv/user-srv
