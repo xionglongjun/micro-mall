@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"sms-srv/enums"
-	"sms-srv/models"
+	"github.com/xionglongjun/micro-mall/sms-srv/enums"
+	"github.com/xionglongjun/micro-mall/sms-srv/models"
 	"time"
 
 	"github.com/jinzhu/gorm"

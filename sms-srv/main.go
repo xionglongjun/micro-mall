@@ -1,13 +1,13 @@
 package main
 
 import (
-	"sms-srv/handler"
-	"sms-srv/models"
-	"sms-srv/modules/provider"
-	"sms-srv/repository"
-	"sms-srv/subscriber"
+	"github.com/xionglongjun/micro-mall/sms-srv/handler"
+	"github.com/xionglongjun/micro-mall/sms-srv/models"
+	"github.com/xionglongjun/micro-mall/sms-srv/modules/provider"
+	"github.com/xionglongjun/micro-mall/sms-srv/repository"
+	"github.com/xionglongjun/micro-mall/sms-srv/subscriber"
 
-	send "sms-srv/proto/send"
+	send "github.com/xionglongjun/micro-mall/sms-srv/proto/send"
 
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/util/log"

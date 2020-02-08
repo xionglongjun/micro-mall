@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"sms-srv/models"
+	"github.com/xionglongjun/micro-mall/sms-srv/models"
 
 	"github.com/jinzhu/gorm"
 )

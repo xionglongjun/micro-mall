@@ -5,7 +5,7 @@ This is the User service
 Generated with
 
 ```
-micro new user-srv --namespace=go.micro --type=srv
+micro new github.com/xionglongjun/micro-mall/user-srv --namespace=go.micro --type=srv
 ```
 
 ## Getting Started
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./user-srv
+./github.com/xionglongjun/micro-mall/user-srv
 ```
 
 Build a docker image

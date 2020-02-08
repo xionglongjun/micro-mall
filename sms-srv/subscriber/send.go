@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro/go-micro/util/log"
 
-	send "sms-srv/proto/send"
+	send "github.com/xionglongjun/micro-mall/sms-srv/proto/send"
 )
 
 type Send struct{}

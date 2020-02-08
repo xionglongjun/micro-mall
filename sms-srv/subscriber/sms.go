@@ -5,7 +5,7 @@ import (
 
 	"github.com/micro/go-micro/util/log"
 
-	sms "sms-srv/proto/sms"
+	sms "github.com/xionglongjun/micro-mall/sms-srv/proto/sms"
 )
 
 type Sms struct{}

@@ -2,10 +2,10 @@ package handler
 
 import (
 	"context"
-	"user-srv/models"
-	auth "user-srv/proto/auth"
-	"user-srv/repository"
-	"user-srv/utils"
+	"github.com/xionglongjun/micro-mall/user-srv/models"
+	auth "github.com/xionglongjun/micro-mall/user-srv/proto/auth"
+	"github.com/xionglongjun/micro-mall/user-srv/repository"
+	"github.com/xionglongjun/micro-mall/user-srv/utils"
 
 	send "github.com/xionglongjun/micro-mall/sms-srv/proto/send"
 

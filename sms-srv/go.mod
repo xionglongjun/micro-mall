@@ -1,4 +1,4 @@
-module sms-srv
+module github.com/xionglongjun/micro-mall/sms-srv
 
 go 1.13
 
@@ -9,5 +9,3 @@ require (
 	github.com/micro/go-micro v1.18.0
 	github.com/shesuyo/yunpian v0.0.0-20151022131627-a889bf268bad
 )
-
-replace github.com/xionglongjun/micro-mall => /Users/jayden/Development/Code/Golang/micro-mall

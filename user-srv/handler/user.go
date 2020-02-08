@@ -2,9 +2,9 @@ package handler
 
 import (
 	"context"
-	"user-srv/models"
-	user "user-srv/proto/user"
-	"user-srv/repository"
+	"github.com/xionglongjun/micro-mall/user-srv/models"
+	user "github.com/xionglongjun/micro-mall/user-srv/proto/user"
+	"github.com/xionglongjun/micro-mall/user-srv/repository"
 
 	"github.com/micro/go-micro/errors"
 )

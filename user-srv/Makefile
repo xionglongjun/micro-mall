@@ -13,7 +13,7 @@ proto:
 .PHONY: build
 build: proto
 
-	go build -o user-srv *.go
+	go build -o github.com/xionglongjun/micro-mall/user-srv *.go
 
 .PHONY: test
 test:
@@ -21,4 +21,4 @@ test:
 
 .PHONY: docker
 docker:
-	docker build . -t user-srv:latest
+	docker build . -t github.com/xionglongjun/micro-mall/user-srv:latest

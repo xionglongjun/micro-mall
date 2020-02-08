@@ -5,7 +5,7 @@ This is the Sms service
 Generated with
 
 ```
-micro new sms-srv --namespace=go.micro --type=srv
+micro new github.com/xionglongjun/micro-mall/sms-srv --namespace=go.micro --type=srv
 ```
 
 ## Getting Started
@@ -46,7 +46,7 @@ make build
 
 Run the service
 ```
-./sms-srv
+./github.com/xionglongjun/micro-mall/sms-srv
 ```
 
 Build a docker image

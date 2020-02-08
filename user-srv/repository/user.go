@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"user-srv/models"
+	"github.com/xionglongjun/micro-mall/user-srv/models"
 
 	"github.com/jinzhu/gorm"
 )
