@@ -12,5 +12,6 @@
 *.out
 
 .idea/
+vendor
 sms-srv/sms-srv
 user-srv/user-srv

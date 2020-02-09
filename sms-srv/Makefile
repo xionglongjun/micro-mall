@@ -1,23 +1,36 @@
-
 GOPATH:=$(shell go env GOPATH)
+GIT_COMMIT=$(shell git rev-parse --short HEAD)
+GIT_TAG=$(shell git describe --abbrev=0 --tags --always --match "v*")
+# IMAGE_TAG=$(GIT_TAG)-$(GIT_COMMIT)
+IMAGE_TAG = v0.0.1
+NAME = sms-srv
+IMAGE_NAME = micro-mall/${NAME}
+NETWORK = micro-mall
+MYSQL_HOST = mysql:3306
+PROTO = sms
 
+all: build
 
-.PHONY: proto
-mod = sms
-name = sms
 proto:
-	@echo execute $(mod) proto file generate
-	protoc --proto_path=. --micro_out=. --go_out=. proto/$(mod)/${name}.proto
+	@echo execute ${PROTO} proto file generate
+	protoc --proto_path=. --micro_out=. --go_out=. proto/${PROTO}/${PROTO}.proto
 	
-.PHONY: build
-build: proto
+vendor:
+	go mod vendor
 
-	go build -o sms-srv *.go
+build:
+	go build -o ${NAME} *.go
 
-.PHONY: test
 test:
 	go test -v ./... -cover
 
-.PHONY: docker
 docker:
-	docker build . -t sms-srv:latest
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_NAME):latest
+	docker push $(IMAGE_NAME):$(IMAGE_TAG)
+	docker push $(IMAGE_NAME):latest
+
+run:
+	docker run --rm --name ${NAME} -p 50051:50051 --network ${NETWORK} -e MICRO_ADDRESS=:50051 -e MICRO_REGISTRY=mdns -e MYSQL_HOST=${MYSQL_HOST} ${IMAGE_NAME}:${IMAGE_TAG}
+
+.PHONY: build proto clean vet test docker run

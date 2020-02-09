@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/xionglongjun/micro-mall/sms-srv/handler"
 	"github.com/xionglongjun/micro-mall/sms-srv/models"
 	"github.com/xionglongjun/micro-mall/sms-srv/modules/provider"
@@ -14,19 +17,32 @@ import (
 )
 
 func main() {
-
-	var (
-		driver models.Driver
-	)
-	driver = &models.Mysql{
-		User:     "root",
-		Password: "123456",
-		Name:     "mall_sms",
-		Host:     "127.0.0.1:3306",
+	var host = os.Getenv("MYSQL_HOST")
+	var name = os.Getenv("MYSQL_NAME")
+	var user = os.Getenv("MYSQL_USER")
+	var password = os.Getenv("MYSQL_PASSWORD")
+	fmt.Println(host)
+	if host == "" {
+		host = "127.0.0.1:3306"
+	}
+	if name == "" {
+		name = "mall_sms"
+	}
+	if user == "" {
+		user = "root"
+	}
+	if password == "" {
+		password = "123456"
+	}
+	mysql := &models.Mysql{
+		User:     user,
+		Password: password,
+		Name:     name,
+		Host:     host,
 		Debug:    true,
 	}
 
-	db, err := driver.Connection()
+	db, err := mysql.Connection()
 	defer db.Close()
 	if err != nil {
 		panic(err.Error())

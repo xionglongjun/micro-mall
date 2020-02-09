@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
+
 	"github.com/xionglongjun/micro-mall/user-srv/handler"
 	"github.com/xionglongjun/micro-mall/user-srv/models"
 	auth "github.com/xionglongjun/micro-mall/user-srv/proto/auth"
-	user "github.com/xionglongjun/micro-mall/user-srv/proto/user"
 	"github.com/xionglongjun/micro-mall/user-srv/repository"
 	"github.com/xionglongjun/micro-mall/user-srv/utils"
 
@@ -26,11 +27,28 @@ func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 }
 
 func main() {
+	var host = os.Getenv("MYSQL_HOST")
+	var name = os.Getenv("MYSQL_NAME")
+	var user = os.Getenv("MYSQL_USER")
+	var password = os.Getenv("MYSQL_PASSWORD")
+	fmt.Println(host)
+	if host == "" {
+		host = "127.0.0.1:3306"
+	}
+	if name == "" {
+		name = "mall_user"
+	}
+	if user == "" {
+		user = "root"
+	}
+	if password == "" {
+		password = "123456"
+	}
 	mysql := &models.Mysql{
-		User:     "root",
-		Password: "123456",
-		Name:     "mall_user",
-		Host:     "127.0.0.1:3306",
+		User:     user,
+		Password: password,
+		Name:     name,
+		Host:     host,
 		Debug:    true,
 	}
 	jwt := utils.Jwt{
@@ -61,7 +79,7 @@ func main() {
 
 	// Register Handler
 	auth.RegisterAuthHandler(service.Server(), &handler.Auth{Repo: &repository.AuthRepo{DB: db}, Jwt: jwt})
-	user.RegisterUserHandler(service.Server(), &handler.User{Repo: &repository.UserRepo{DB: db}})
+	// user.RegisterUserHandler(service.Server(), &handler.User{Repo: &repository.UserRepo{DB: db}})
 
 	// Run service
 	if err := service.Run(); err != nil {
