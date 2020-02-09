@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package go.micro.srv.user;
+
+service Auth {
+	rpc Name(NameRequest) returns (AuthResponse) {}
+	rpc Mobile(MobileRequest) returns (AuthResponse) {}
+	rpc Register(RegisterRequest) returns (RegisterResponse) {}
+	rpc ValidateToken(Token) returns (Token) {}
+}
+
+message NameRequest {
+	string name = 1;
+	string password = 2;
+}
+
+message MobileRequest {
+	string mobile = 1;
+	string code = 2;
+}
+
+message AuthResponse {
+	string header = 1;
+  string token = 2;
+  string expiresAt = 3;
+}
+
+message RegisterRequest {
+	string name = 1;
+	string password = 2;
+	string mobile = 3;
+	string code = 4;
+}
+
+message RegisterResponse {
+	bool success = 1;
+}
+
+message Token {
+	string token = 1;
+	bool valid = 2;
+	repeated Error error = 3;
+}
+
+
+message Error {
+    int32 code = 1;
+    string description = 2;
+}

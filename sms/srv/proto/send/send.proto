@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package go.micro.srv.sms;
+
+import "google/protobuf/timestamp.proto";
+
+service Send {
+	rpc BizType(Request) returns (BizTypeResponse) {}
+	rpc Code(CodeRequest) returns (CodeResponse) {}
+	rpc Validate(ValidateRequest) returns (ValidateResponse) {}
+}
+
+message Request {}
+
+enum BizType {
+  login = 0;
+  register = 1;
+	Edit_Password = 2;
+	Tempreset_Password = 3;
+}
+
+enum Mode {
+  Code = 0;
+  Notice = 1;
+}
+
+message MapType {
+	int32 key = 1;
+	string value = 2;
+}
+
+message BizTypeResponse {
+	repeated MapType list = 1;
+}
+
+message CodeRequest {
+	string mobile = 1;
+	BizType bizType = 2;
+	int64 expires = 3;
+}
+
+message CodeResponse {
+	bool success = 1;
+	google.protobuf.Timestamp expiresAt = 2;
+}
+
+message ValidateRequest {
+	string mobile = 1;
+	BizType bizType = 2;
+	string code = 3;
+}
+
+message ValidateResponse {
+	bool success = 1;
+}

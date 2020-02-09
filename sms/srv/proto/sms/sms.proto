@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package go.micro.srv.sms;
+
+service Sms {
+	rpc List(ListRequest) returns (ListResponse) {}
+	rpc Template(TemplateRequest) returns (TemplateResponse) {}
+	rpc Povider(PoviderRequest) returns (PoviderResponse) {}
+}
+message ListRequest {
+	int64 page = 1;
+}
+
+message ListResponse {
+	int64 page = 1;
+}
+
+message TemplateRequest {
+	int64 page = 1;
+}
+
+message TemplateResponse {
+	int64 page = 1;
+}
+
+message PoviderRequest {
+	int64 page = 1;
+}
+
+message PoviderResponse {
+	int64 page = 1;
+}

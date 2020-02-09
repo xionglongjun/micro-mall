@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package go.micro.srv.sms;
+
+service Template {
+	rpc List(ListRequest) returns (ListResponse) {}
+	rpc Create(CreateRequest) returns (CreateResponse)
+}
+
+message ListRequest {
+	string mobile = 1;
+	string code = 2;
+}
+
+message ListResponse {
+	bool success = 1;
+}
+
+message CreateRequest {
+	
+}
+
+message CreateResponse {
+
+}
