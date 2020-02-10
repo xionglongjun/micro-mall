@@ -27,10 +27,10 @@ func logWrapper(fn server.HandlerFunc) server.HandlerFunc {
 }
 
 func main() {
-	var host = os.Getenv("MYSQL_HOST")
-	var name = os.Getenv("MYSQL_NAME")
-	var user = os.Getenv("MYSQL_USER")
-	var password = os.Getenv("MYSQL_PASSWORD")
+	var host = os.Getenv("DB_HOST")
+	var name = os.Getenv("DB_NAME")
+	var user = os.Getenv("DB_USER")
+	var password = os.Getenv("DB_PASSWORD")
 	fmt.Println(host)
 	if host == "" {
 		host = "127.0.0.1:3306"

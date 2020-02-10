@@ -1,0 +1,64 @@
+version: "3.7"
+
+services:
+  mall-api:
+    build: ./micro
+    container_name: micro-api
+    environment:
+      MICRO_REGISTER: "mdns"
+    networks:
+      - micro-mall
+    ports:
+      - 8080:8080
+    command:
+      - api
+      - --handler=rpc
+      - --address=:8080
+  mall-web:
+    build: ./micro
+    container_name: micro-web
+    environment:
+      MICRO_REGISTER: "mdns"
+    networks:
+      - micro-mall
+    ports:
+      - 8082:8082
+    command:
+      - web
+      - --address=:8082
+  user-srv:
+    build: ./user/srv
+    container_name: user-srv
+    environment:
+      MICRO_REGISTER: "mdns"
+      MICRO_ADDRESS: ":50051"
+      DB_NAME: "mall_user"
+      DB_HOST: "mysql:3306"
+      DB_USER: "root"
+      DB_PASSWORD: "123456"
+    depends_on:
+      - mall-api
+      - mall-web
+    networks:
+      - micro-mall
+  sms-srv:
+    build: ./sms/srv
+    container_name: sms-srv
+    environment:
+      MICRO_REGISTER: "mdns"
+      MICRO_ADDRESS: ":50051"
+      DB_NAME: "mall_sms"
+      DB_HOST: "mysql:3306"
+      DB_USER: "root"
+      DB_PASSWORD: "123456"
+    # 启动前先启动以下容器
+    depends_on:
+      - mall-api
+      - mall-web
+    networks:
+      - micro-mall
+networks:
+  micro-mall:
+    # 使用外部网络
+    external: true
+  
